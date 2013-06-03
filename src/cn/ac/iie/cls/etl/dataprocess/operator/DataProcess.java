@@ -4,7 +4,7 @@
  */
 package cn.ac.iie.cls.etl.dataprocess.operator;
 
-import cn.ac.iie.ocls.etl.taskmanage.Task;
+import cn.ac.iie.cls.etl.taskmanage.Task;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
