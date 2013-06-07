@@ -4,10 +4,23 @@
  */
 package cn.ac.iie.cls.etl.dataprocess.operator.inputoperator;
 
+import au.com.bytecode.opencsv.CSVReader;
 import cn.ac.iie.cls.etl.dataprocess.dataset.DataSet;
 import cn.ac.iie.cls.etl.dataprocess.dataset.Record;
 import cn.ac.iie.cls.etl.dataprocess.operator.Operator;
 import cn.ac.iie.cls.etl.dataprocess.operator.Port;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
 
 /**
  *
@@ -17,7 +30,15 @@ public class CSVFileInputOperator extends Operator {
 
     public static final String OUTPUT_PORT = "output1";
     public static final String ERRDATA_PORT = "error1";
-
+    
+    
+    private String csvFilePath = "";
+    private boolean hasTitile = false;
+    private boolean trimLines = false;
+    private String fileEncoding = "";
+    private List<Column> columnSet = new ArrayList<Column>();
+    
+    
     protected void setupPorts() throws Exception{
         setupPort(new Port(Port.OUTPUT, OUTPUT_PORT));
         setupPort(new Port(Port.OUTPUT, ERRDATA_PORT));
@@ -30,44 +51,90 @@ public class CSVFileInputOperator extends Operator {
     }
 
     protected void execute() {
+        CSVReader reader = null;//读取csv文件的类
+        String[]  line = null;//存放读取出来的一行的数据
+        FileReader fr = null;//文件读取
+        Record record = null;
+       
         try {
-            int batchSize = 0;
-            while (true) {
-                DataSet dataSet = batchSize++ < 1000 ? getNextDataSet(true, 1000) : getNextDataSet(false, 1000);
-                getPort(OUTPUT_PORT).write(dataSet);
-                if (dataSet.isValid()) {
-                    reportExecuteStatus();
-                } else {
-                    break;
+            DataSet dataSet = getDataSet();
+            fr = new FileReader(csvFilePath );
+            reader = new CSVReader(fr);	
+            while((line=reader.readNext())!=null){
+                record = new Record();
+                for(Column column : columnSet){
+                    record.appendField(line[column.columnIdx - 1]); //取出数据
                 }
-            }
+                dataSet.appendRecord(record);
+                System.out.print(record.getField(0));
+                System.out.println(record.getField(1));
+                if (dataSet.size() >= 1000) {
+                    dataSet = getDataSet();
+                }
+           }
         } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
 
-    private DataSet getNextDataSet(boolean valid, int _size) {
-        DataSet dataSet = null;
-        if (valid) {
-            dataSet = new DataSet(DataSet.VALID);
-            dataSet.putFieldName2Idx("fa", 0);
-            dataSet.putFieldName2Idx("fb", 1);
-            dataSet.putFieldName2Idx("fc", 2);
-            for (int i = 0; i < _size; i++) {
-                Record record = new Record();
-                record.appendField("a");
-                record.appendField("b");
-                record.appendField("c");
-                dataSet.appendRecord(record);
-            }
-        } else {
-            dataSet = new DataSet(DataSet.EOS);
+    private DataSet getDataSet() {
+       DataSet dataSet = new DataSet(DataSet.VALID);
+        int idx = 0;
+        for (Column column : columnSet) {
+            dataSet.putFieldName2Idx(column.columnName, idx++);
         }
         return dataSet;
     }
-
+    
     @Override
     protected void parseParameters(String pParameters) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet.");
+        Document document = DocumentHelper.parseText(pParameters);
+        Element operatorElt = document.getRootElement();
+        Iterator parameterItor = operatorElt.elementIterator("parameter");
+        while (parameterItor.hasNext()) {
+            Element parameterElement = (Element) parameterItor.next();
+            String parameterName = parameterElement.attributeValue("name");
+            if (parameterName.equals("csvFile")) {
+                csvFilePath = parameterElement.getStringValue();
+            }else if (parameterName.equals("hasHeader")) {
+                hasTitile = Boolean.parseBoolean(parameterElement.getStringValue()); 
+            }else if (parameterName.equals("trimLines")) {
+                trimLines = Boolean.parseBoolean(parameterElement.getStringValue());
+            } else if (parameterName.equals("fileEncoding")) {
+                fileEncoding = parameterElement.getStringValue();
+            }
+        }
+        Element parameterListElt = operatorElt.element("parameterlist");
+        Iterator parametermapItor = parameterListElt.elementIterator("parametermap");
+        while (parametermapItor.hasNext()) {
+            Element parametermapElt = (Element) parametermapItor.next();
+            String columnName = parametermapElt.attributeValue("columnname");
+            int columnIdx = Integer.parseInt(parametermapElt.attributeValue("columnindex"));
+
+            int columnType = Column.parseType(parametermapElt.attributeValue("columntype"));
+            columnSet.add(new Column(columnName, columnIdx, columnType));
+           
+        }
+        Collections.sort(columnSet);
+    
+    }
+    
+    
+    public static void main(String[] args){
+        File inputXml = new File("csvfileinputoperator-specific.xml");
+        try {
+            String dataProcessDescriptor = "";
+            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(inputXml)));
+            String line = null;
+            while ((line = br.readLine()) != null) {
+                dataProcessDescriptor += line;
+            }
+            CSVFileInputOperator csvFileInputOperator = new  CSVFileInputOperator();
+            csvFileInputOperator.parseParameters(dataProcessDescriptor);
+            csvFileInputOperator.execute();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    
     }
 }
