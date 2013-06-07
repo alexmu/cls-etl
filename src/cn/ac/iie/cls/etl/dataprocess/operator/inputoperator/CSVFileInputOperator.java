@@ -30,16 +30,13 @@ public class CSVFileInputOperator extends Operator {
 
     public static final String OUTPUT_PORT = "output1";
     public static final String ERRDATA_PORT = "error1";
-    
-    
     private String csvFilePath = "";
     private boolean hasTitile = false;
     private boolean trimLines = false;
     private String fileEncoding = "";
     private List<Column> columnSet = new ArrayList<Column>();
-    
-    
-    protected void setupPorts() throws Exception{
+
+    protected void setupPorts() throws Exception {
         setupPort(new Port(Port.OUTPUT, OUTPUT_PORT));
         setupPort(new Port(Port.OUTPUT, ERRDATA_PORT));
     }
@@ -52,17 +49,17 @@ public class CSVFileInputOperator extends Operator {
 
     protected void execute() {
         CSVReader reader = null;//读取csv文件的类
-        String[]  line = null;//存放读取出来的一行的数据
+        String[] line = null;//存放读取出来的一行的数据
         FileReader fr = null;//文件读取
         Record record = null;
-       
+
         try {
             DataSet dataSet = getDataSet();
-            fr = new FileReader(csvFilePath );
-            reader = new CSVReader(fr);	
-            while((line=reader.readNext())!=null){
+            fr = new FileReader(csvFilePath);
+            reader = new CSVReader(fr);
+            while ((line = reader.readNext()) != null) {
                 record = new Record();
-                for(Column column : columnSet){
+                for (Column column : columnSet) {
                     record.appendField(line[column.columnIdx - 1]); //取出数据
                 }
                 dataSet.appendRecord(record);
@@ -70,22 +67,23 @@ public class CSVFileInputOperator extends Operator {
                 System.out.println(record.getField(1));
                 if (dataSet.size() >= 1000) {
                     dataSet = getDataSet();
+                    //write to outport
                 }
-           }
+            }
         } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
 
     private DataSet getDataSet() {
-       DataSet dataSet = new DataSet(DataSet.VALID);
+        DataSet dataSet = new DataSet(DataSet.VALID);
         int idx = 0;
         for (Column column : columnSet) {
             dataSet.putFieldName2Idx(column.columnName, idx++);
         }
         return dataSet;
     }
-    
+
     @Override
     protected void parseParameters(String pParameters) throws Exception {
         Document document = DocumentHelper.parseText(pParameters);
@@ -96,9 +94,9 @@ public class CSVFileInputOperator extends Operator {
             String parameterName = parameterElement.attributeValue("name");
             if (parameterName.equals("csvFile")) {
                 csvFilePath = parameterElement.getStringValue();
-            }else if (parameterName.equals("hasHeader")) {
-                hasTitile = Boolean.parseBoolean(parameterElement.getStringValue()); 
-            }else if (parameterName.equals("trimLines")) {
+            } else if (parameterName.equals("hasHeader")) {
+                hasTitile = Boolean.parseBoolean(parameterElement.getStringValue());
+            } else if (parameterName.equals("trimLines")) {
                 trimLines = Boolean.parseBoolean(parameterElement.getStringValue());
             } else if (parameterName.equals("fileEncoding")) {
                 fileEncoding = parameterElement.getStringValue();
@@ -113,14 +111,13 @@ public class CSVFileInputOperator extends Operator {
 
             int columnType = Column.parseType(parametermapElt.attributeValue("columntype"));
             columnSet.add(new Column(columnName, columnIdx, columnType));
-           
+
         }
         Collections.sort(columnSet);
-    
+
     }
-    
-    
-    public static void main(String[] args){
+
+    public static void main(String[] args) {
         File inputXml = new File("csvfileinputoperator-specific.xml");
         try {
             String dataProcessDescriptor = "";
@@ -129,12 +126,12 @@ public class CSVFileInputOperator extends Operator {
             while ((line = br.readLine()) != null) {
                 dataProcessDescriptor += line;
             }
-            CSVFileInputOperator csvFileInputOperator = new  CSVFileInputOperator();
+            CSVFileInputOperator csvFileInputOperator = new CSVFileInputOperator();
             csvFileInputOperator.parseParameters(dataProcessDescriptor);
             csvFileInputOperator.execute();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-    
+
     }
 }

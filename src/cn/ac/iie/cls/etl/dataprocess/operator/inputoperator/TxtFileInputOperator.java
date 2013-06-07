@@ -99,9 +99,9 @@ public class TxtFileInputOperator extends Operator {
                     record.appendField(fieldItems[column.columnIdx - 1]);
                 }
                 dataSet.appendRecord(record);
-                if (dataSet.size() >= 1000) {
-                    System.out.println(dataSet.size());
+                if (dataSet.size() >= 1000) {                   
                     dataSet = getDataSet();
+                    //write to outport
                 }
             }
             System.out.println(dataSet.size());

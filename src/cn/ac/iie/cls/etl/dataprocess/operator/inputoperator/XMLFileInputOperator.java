@@ -18,8 +18,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
@@ -71,8 +69,7 @@ public class XMLFileInputOperator extends Operator {
                System.out.println(record.getField("ip"));
                System.out.println(record.getField("time"));
             }
-            if (dataSet.size() >= 1000) {
-                System.out.println(dataSet.size());
+            if (dataSet.size() >= 1000) {                
                 dataSet = getDataSet();
             } 
             System.out.println(dataSet.size());
