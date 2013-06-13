@@ -10,7 +10,7 @@ import cn.ac.iie.cls.etl.dataprocess.operator.inputoperator.CSVFileInputOperator
 import cn.ac.iie.cls.etl.dataprocess.operator.DataProcess;
 import cn.ac.iie.cls.etl.dataprocess.operator.Operator;
 import cn.ac.iie.cls.etl.dataprocess.operator.Port;
-import cn.ac.iie.cls.etl.dataprocess.operator.filteroperator.RecordFilterOperator;
+import cn.ac.iie.cls.etl.dataprocess.operator.recordoperator.RecordFilterOperator;
 import cn.ac.iie.cls.etl.dataprocess.operator.inputoperator.XMLFileInputOperator;
 import java.io.BufferedReader;
 import java.io.File;
