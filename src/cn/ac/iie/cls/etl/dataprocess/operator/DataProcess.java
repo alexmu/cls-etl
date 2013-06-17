@@ -4,7 +4,7 @@
  */
 package cn.ac.iie.cls.etl.dataprocess.operator;
 
-import cn.ac.iie.cls.etl.taskmanage.Task;
+import cn.ac.iie.cls.etl.cc.slave.etltask.ETLTask;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -75,7 +75,7 @@ public class DataProcess extends Operator {
         }
     }
 
-    public void setTaskManager(Task pTaskManager) {
+    public void setTaskManager(ETLTask pTaskManager) {
         task = pTaskManager;
         Iterator subOperatorItor = subOperators.values().iterator();
         while (subOperatorItor.hasNext()) {
@@ -122,6 +122,5 @@ public class DataProcess extends Operator {
 
     @Override
     protected void parseParameters(String pParameters) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

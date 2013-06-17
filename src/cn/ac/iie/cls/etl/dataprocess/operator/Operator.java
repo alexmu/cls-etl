@@ -4,7 +4,7 @@
  */
 package cn.ac.iie.cls.etl.dataprocess.operator;
 
-import cn.ac.iie.cls.etl.taskmanage.Task;
+import cn.ac.iie.cls.etl.cc.slave.etltask.ETLTask;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -18,7 +18,7 @@ public abstract class Operator implements Runnable {
     protected String name;
     protected Operator parentOperator;
     protected Map<String, Port> portSet = new HashMap<String, Port>();
-    protected Task task = null;
+    protected ETLTask task = null;
     protected boolean alive;
     
 
@@ -51,7 +51,7 @@ public abstract class Operator implements Runnable {
 
     public abstract void validate() throws Exception;
 
-    public void setTaskManager(Task pTaskManager) {
+    public void setTaskManager(ETLTask pTaskManager) {
         task = pTaskManager;
     }
 

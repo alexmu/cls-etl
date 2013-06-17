@@ -28,21 +28,21 @@ import org.dom4j.Element;
  */
 public class CSVFileInputOperator extends Operator {
 
-    public static final String OUTPUT_PORT = "output1";
-    public static final String ERRDATA_PORT = "error1";
-    private String csvFilePath = "";
+    public static final String OUT_PORT = "outport1";
+    public static final String ERROR_PORT = "error1";
+    private String csvFile = "";
     private boolean hasTitile = false;
     private boolean trimLines = false;
     private String fileEncoding = "";
     private List<Column> columnSet = new ArrayList<Column>();
 
     protected void setupPorts() throws Exception {
-        setupPort(new Port(Port.OUTPUT, OUTPUT_PORT));
-        setupPort(new Port(Port.OUTPUT, ERRDATA_PORT));
+        setupPort(new Port(Port.OUTPUT, OUT_PORT));
+        setupPort(new Port(Port.OUTPUT, ERROR_PORT));
     }
 
     public void validate() throws Exception {
-        if (getPort(OUTPUT_PORT).getConnector().size() < 1) {
+        if (getPort(OUT_PORT).getConnector().size() < 1) {
             throw new Exception("out port with no connectors");
         }
     }
@@ -54,8 +54,8 @@ public class CSVFileInputOperator extends Operator {
         Record record = null;
 
         try {
-            DataSet dataSet = getDataSet();
-            fr = new FileReader(csvFilePath);
+            DataSet dataSet = getDataSet(DataSet.VALID);
+            fr = new FileReader("csv-sample-file.csv");
             reader = new CSVReader(fr);
             while ((line = reader.readNext()) != null) {
                 record = new Record();
@@ -63,23 +63,33 @@ public class CSVFileInputOperator extends Operator {
                     record.appendField(line[column.columnIdx - 1]); //取出数据
                 }
                 dataSet.appendRecord(record);
-                System.out.print(record.getField(0));
-                System.out.println(record.getField(1));
                 if (dataSet.size() >= 1000) {
-                    dataSet = getDataSet();
-                    //write to outport
+                    portSet.get(OUT_PORT).write(dataSet);
+                    reportExecuteStatus();
+                    dataSet = getDataSet(DataSet.VALID);
                 }
             }
+            if (dataSet.size() > 0) {
+                portSet.get(OUT_PORT).write(dataSet);
+                reportExecuteStatus();
+            }
+            portSet.get(OUT_PORT).write(getDataSet(DataSet.EOS));
         } catch (Exception ex) {
             ex.printStackTrace();
+            try {
+                portSet.get(OUT_PORT).write(getDataSet(DataSet.EOS));
+            } catch (Exception ex2) {
+            }
         }
     }
 
-    private DataSet getDataSet() {
-        DataSet dataSet = new DataSet(DataSet.VALID);
-        int idx = 0;
-        for (Column column : columnSet) {
-            dataSet.putFieldName2Idx(column.columnName, idx++);
+    private DataSet getDataSet(int dataSetType) {
+        DataSet dataSet = new DataSet(dataSetType);
+        if (dataSetType == DataSet.VALID) {
+            int idx = 0;
+            for (Column column : columnSet) {
+                dataSet.putFieldName2Idx(column.columnName, idx++);
+            }
         }
         return dataSet;
     }
@@ -93,7 +103,7 @@ public class CSVFileInputOperator extends Operator {
             Element parameterElement = (Element) parameterItor.next();
             String parameterName = parameterElement.attributeValue("name");
             if (parameterName.equals("csvFile")) {
-                csvFilePath = parameterElement.getStringValue();
+                csvFile = parameterElement.getStringValue();
             } else if (parameterName.equals("hasHeader")) {
                 hasTitile = Boolean.parseBoolean(parameterElement.getStringValue());
             } else if (parameterName.equals("trimLines")) {
@@ -132,6 +142,5 @@ public class CSVFileInputOperator extends Operator {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-
     }
 }

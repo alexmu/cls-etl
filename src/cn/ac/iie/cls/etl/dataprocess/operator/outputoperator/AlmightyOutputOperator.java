@@ -14,14 +14,14 @@ import cn.ac.iie.cls.etl.dataprocess.operator.Port;
  */
 public class AlmightyOutputOperator extends Operator {
 
-    public static final String INPUT_PORT = "input1";
-    public static final String OUTPUT_PORT = "output1";
-    public static final String ERRDATA_PORT = "error1";
+    public static final String IN_PORT = "inport1";
+    public static final String OUT_PORT = "outport1";
+    public static final String ERROR_PORT = "error1";
 
     protected void setupPorts() throws Exception {
-        setupPort(new Port(Port.INPUT, INPUT_PORT));
-        setupPort(new Port(Port.OUTPUT, OUTPUT_PORT));
-        setupPort(new Port(Port.OUTPUT, ERRDATA_PORT));
+        setupPort(new Port(Port.INPUT, IN_PORT));
+        setupPort(new Port(Port.OUTPUT, OUT_PORT));
+        setupPort(new Port(Port.OUTPUT, ERROR_PORT));
     }
 
     public void validate() throws Exception {
@@ -30,9 +30,9 @@ public class AlmightyOutputOperator extends Operator {
     protected void execute() {
         try {
             while (true) {
-                DataSet dataSet = portSet.get(INPUT_PORT).getNext();
+                DataSet dataSet = portSet.get(IN_PORT).getNext();
                 if (dataSet.isValid()) {
-                    portSet.get(OUTPUT_PORT).incMetric(dataSet.size());
+                    portSet.get(OUT_PORT).incMetric(dataSet.size());
                     System.out.println("output " + dataSet.size() + " records");
                     reportExecuteStatus();
                 } else {
@@ -46,6 +46,6 @@ public class AlmightyOutputOperator extends Operator {
 
     @Override
     protected void parseParameters(String pParameters) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet.");
+       
     }
 }

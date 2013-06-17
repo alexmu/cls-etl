@@ -150,16 +150,16 @@ public class DataProcessFactory {
                     }
                 }
             } catch (Exception ex) {
-                ex.printStackTrace();
+                throw ex;
             }
         } else {
             Class operatorClass = operatorClassSet.get(operatorClassName);
             if (operatorClass != null) {
                 try {
                     operator = (Operator) operatorClass.newInstance();
-                    operator.init(operatorName, null);
+                    operator.init(operatorName, pOperatorNode.asXML());
                 } catch (Exception ex) {
-                    throw new Exception("initializing operator " + operatorClassName + " is failed for", ex);
+                    throw new Exception("initializing operator " + operatorClassName + " is failed for " + ex.getMessage(), ex);
                 }
             } else {
                 throw new Exception("no such operator " + operatorClassName);
