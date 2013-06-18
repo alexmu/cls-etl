@@ -57,4 +57,8 @@ public class DataSet {
     public void putFieldName2Idx(String pColumnName, int pColumnIdx) {
         fieldName2fieldIdx.put(pColumnName, pColumnIdx);
     }
+    
+    public int getFieldNum(){
+        return fieldName2fieldIdx.size();
+    }
 }

@@ -15,13 +15,13 @@ import cn.ac.iie.cls.etl.dataprocess.operator.Port;
  */
 public class RecordFilterOperator extends Operator {
 
-    public static final String INPUT_PORT = "input1";
-    public static final String OUTPUT_PORT = "output1";
+    public static final String IN_PORT = "inport1";
+    public static final String OUT_PORT = "outport1";
     public static final String ERRDATA_PORT = "error1";
 
     protected void setupPorts() throws Exception{
-        setupPort(new Port(Port.INPUT, INPUT_PORT));
-        setupPort(new Port(Port.OUTPUT, OUTPUT_PORT));
+        setupPort(new Port(Port.INPUT, IN_PORT));
+        setupPort(new Port(Port.OUTPUT, OUT_PORT));
         setupPort(new Port(Port.OUTPUT, ERRDATA_PORT));
     }
 
@@ -29,23 +29,18 @@ public class RecordFilterOperator extends Operator {
     }
 
     protected void execute() {
-        int dataSetCnt = 0;
         try {
             while (true) {
-//                System.out.println(name + " will get " + "next dataset");
-                DataSet dataSet = portSet.get(INPUT_PORT).getNext();
+                DataSet dataSet = portSet.get(IN_PORT).getNext();
                 for (int i = 0; i < dataSet.size(); i++) {
                     Record record = dataSet.getRecord(i);
-//                    System.out.println(record.getField("fa"));
                 }
 
                 if (dataSet.isValid()) {
-                    portSet.get(OUTPUT_PORT).write(dataSet);
-                    dataSetCnt++;
-//                    System.out.println(name + " get " + dataSetCnt + "st dataset");
+                    portSet.get(OUT_PORT).write(dataSet);
                     reportExecuteStatus();
                 } else {
-                    portSet.get(OUTPUT_PORT).write(dataSet);
+                    portSet.get(OUT_PORT).write(dataSet);
                     break;
                 }
             }

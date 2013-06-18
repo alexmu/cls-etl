@@ -4,8 +4,6 @@
  */
 package cn.ac.iie.cls.etl.dataprocess.operator.fieldoperator;
 
-import cn.ac.iie.cls.etl.dataprocess.dataset.DataSet;
-import cn.ac.iie.cls.etl.dataprocess.dataset.Record;
 import cn.ac.iie.cls.etl.dataprocess.operator.Operator;
 import cn.ac.iie.cls.etl.dataprocess.operator.Port;
 import java.util.ArrayList;
@@ -19,12 +17,12 @@ import org.dom4j.Element;
  *
  * @author alexmu
  */
-public class TrimFieldOperator extends Operator {
+public class TimeFormatOperator extends Operator {
 
     public static final String IN_PORT = "inport1";
     public static final String OUT_PORT = "outport1";
     public static final String ERROR_PORT = "error1";
-    List<Field2Trim> field2TrimSet = new ArrayList<Field2Trim>();
+    List<Field2TimeFormat> field2TimeFormatSet = new ArrayList<Field2TimeFormat>();
 
     protected void setupPorts() throws Exception {
         setupPort(new Port(Port.INPUT, IN_PORT));
@@ -39,28 +37,7 @@ public class TrimFieldOperator extends Operator {
     }
 
     protected void execute() {
-        try {
-            while (true) {
-                DataSet dataSet = portSet.get(IN_PORT).getNext();
-                int dataSize = dataSet.size();
-                for (int i = 0; i < dataSize; i++) {
-                    Record record = dataSet.getRecord(i);
-                    for (Field2Trim field2Trim : field2TrimSet) {
-                        record.setField(field2Trim.fieldName, record.getField(field2Trim.fieldName).trim());
-                    }
-                }
-
-                if (dataSet.isValid()) {
-                    portSet.get(OUT_PORT).write(dataSet);
-                    reportExecuteStatus();
-                } else {
-                    portSet.get(OUT_PORT).write(dataSet);
-                    break;
-                }
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        
     }
 
     @Override
@@ -72,16 +49,28 @@ public class TrimFieldOperator extends Operator {
         while (parameterItor.hasNext()) {
             Element paraMapElt = (Element) parameterItor.next();
             String fieldName = paraMapElt.attributeValue("fieldname");
-            field2TrimSet.add(new Field2Trim(fieldName));
+            String fromType = paraMapElt.attributeValue("fromtype");
+            String fromPattern = paraMapElt.attributeValue("frompattern");
+            String toType = paraMapElt.attributeValue("totype");
+            String toPattern = paraMapElt.attributeValue("topattern");
+            field2TimeFormatSet.add(new Field2TimeFormat(fieldName, fromType, fromPattern, toType, toPattern));
         }
     }
 
-    class Field2Trim {
+    class Field2TimeFormat {
 
         String fieldName;
+        String fromType;
+        String fromPattern;
+        String toType;
+        String toPattern;
 
-        public Field2Trim(String pFieldName) {
-            fieldName = pFieldName;
+        public Field2TimeFormat(String pFieldName, String pFromType, String pFromPattern, String pToType, String pToPattern) {
+            this.fieldName = pFieldName;
+            this.fromType = pFromType;
+            this.fromPattern = pFromPattern;
+            this.toType = pToType;
+            this.toPattern = pToPattern;
         }
     }
 }

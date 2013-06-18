@@ -8,10 +8,6 @@ import cn.ac.iie.cls.etl.dataprocess.dataset.DataSet;
 import cn.ac.iie.cls.etl.dataprocess.dataset.Record;
 import cn.ac.iie.cls.etl.dataprocess.operator.Operator;
 import cn.ac.iie.cls.etl.dataprocess.operator.Port;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -23,12 +19,12 @@ import org.dom4j.Element;
  *
  * @author alexmu
  */
-public class AddFieldOperator extends Operator {
+public class FieldLUConvertOperator extends Operator {
 
     public static final String IN_PORT = "inport1";
     public static final String OUT_PORT = "outport1";
     public static final String ERROR_PORT = "error1";
-    private List<Field2Add> field2AddSet = new ArrayList<Field2Add>();
+    List<Field2LUConvert> field2LUConvertSet = new ArrayList<Field2LUConvert>();
 
     protected void setupPorts() throws Exception {
         setupPort(new Port(Port.INPUT, IN_PORT));
@@ -47,17 +43,17 @@ public class AddFieldOperator extends Operator {
             while (true) {
                 DataSet dataSet = portSet.get(IN_PORT).getNext();
                 int dataSize = dataSet.size();
-                
-                int dataSetFieldNum = dataSet.getFieldNum();
-                int idx = 0;
-                for (Field2Add columnValueHolder : field2AddSet) {
-                    dataSet.putFieldName2Idx(columnValueHolder.fieldName, dataSetFieldNum + (idx++));
-                }
-
-                for (int i = 0; i < dataSize; i++) {
-                    Record record = dataSet.getRecord(i);
-                    for (Field2Add columnValueHolder : field2AddSet) {
-                        record.appendField(columnValueHolder.fieldValue);
+                for (Field2LUConvert field2LUConvert : field2LUConvertSet) {
+                    if (field2LUConvert.convertType.equals("lower")) {
+                        for (int i = 0; i < dataSize; i++) {
+                            Record record = dataSet.getRecord(i);
+                            record.setField(field2LUConvert.fieldName, record.getField(field2LUConvert.fieldName).toLowerCase());
+                        }
+                    } else if (field2LUConvert.convertType.equals("upper")) {
+                        for (int i = 0; i < dataSize; i++) {
+                            Record record = dataSet.getRecord(i);
+                            record.setField(field2LUConvert.fieldName, record.getField(field2LUConvert.fieldName).toUpperCase());
+                        }
                     }
                 }
 
@@ -82,35 +78,20 @@ public class AddFieldOperator extends Operator {
 
         while (parameterItor.hasNext()) {
             Element paraMapElt = (Element) parameterItor.next();
-            field2AddSet.add(new Field2Add(paraMapElt.attributeValue("fieldname"), paraMapElt.attributeValue("fieldvalue")));
+            String fieldName = paraMapElt.attributeValue("fieldname");
+            String convertType = paraMapElt.attributeValue("converttype");
+            field2LUConvertSet.add(new Field2LUConvert(fieldName, convertType));
         }
     }
 
-    class Field2Add {
+    class Field2LUConvert {
 
         String fieldName;
-        String fieldValue;
+        String convertType;
 
-        public Field2Add(String pColumnName, String pColumnValue) {
-            fieldName = pColumnName;
-            fieldValue = pColumnValue;
-        }
-    }
-
-    public static void main(String[] args) {
-        File inputXml = new File("addFieldOperator-specific.xml");
-        try {
-            String dataProcessDescriptor = "";
-            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(inputXml)));
-            String line = null;
-            while ((line = br.readLine()) != null) {
-                dataProcessDescriptor += line;
-            }
-            AddFieldOperator addFieldOperator = new AddFieldOperator();
-            addFieldOperator.parseParameters(dataProcessDescriptor);
-            addFieldOperator.execute();
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        public Field2LUConvert(String pFieldName, String pConvertType) {
+            fieldName = pFieldName;
+            convertType = pConvertType;
         }
     }
 }

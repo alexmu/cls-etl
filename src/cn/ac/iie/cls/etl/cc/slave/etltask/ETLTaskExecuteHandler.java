@@ -5,6 +5,10 @@
 package cn.ac.iie.cls.etl.cc.slave.etltask;
 
 import cn.ac.iie.cls.etl.cc.slave.SlaveHandler;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 
 /**
  *
@@ -24,5 +28,21 @@ public class ETLTaskExecuteHandler implements SlaveHandler {
             result = "failed";
         }
         return result;
+    }
+
+    public static void main(String[] args) {
+        File inputXml = new File("addFieldOperator-test-specific.xml");
+        try {
+            String dataProcessDescriptor = "";
+            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(inputXml)));
+            String line = null;
+            while ((line = br.readLine()) != null) {
+                dataProcessDescriptor += line;
+            }
+            ETLTaskExecuteHandler etlTaskExecuteHandler = new ETLTaskExecuteHandler();
+            System.out.println(etlTaskExecuteHandler.execute(dataProcessDescriptor));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 }

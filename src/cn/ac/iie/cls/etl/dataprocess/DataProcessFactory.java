@@ -10,6 +10,7 @@ import cn.ac.iie.cls.etl.dataprocess.operator.inputoperator.CSVFileInputOperator
 import cn.ac.iie.cls.etl.dataprocess.operator.DataProcess;
 import cn.ac.iie.cls.etl.dataprocess.operator.Operator;
 import cn.ac.iie.cls.etl.dataprocess.operator.Port;
+import cn.ac.iie.cls.etl.dataprocess.operator.fieldoperator.AddFieldOperator;
 import cn.ac.iie.cls.etl.dataprocess.operator.recordoperator.RecordFilterOperator;
 import cn.ac.iie.cls.etl.dataprocess.operator.inputoperator.XMLFileInputOperator;
 import java.io.BufferedReader;
@@ -35,6 +36,7 @@ public class DataProcessFactory {
         {
             put("CSVFileInput", CSVFileInputOperator.class);
             put("XMLFileInput", XMLFileInputOperator.class);
+            put("AddField", AddFieldOperator.class);
             put("Filter", RecordFilterOperator.class);
             put("AlmightyOutput", AlmightyOutputOperator.class);
         }

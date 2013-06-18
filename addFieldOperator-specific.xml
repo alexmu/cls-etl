@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+<operator name=" ff8080812ae4b413012aef2f338a009b" alias="addField" class="AddField">
+    <parameterlist name="fields">
+        <parametermap fieldname="Country" fieldvalue="CN"/>
+        <parametermap fieldname="City" fieldvalue="BJ"/>
+    </parameterlist>
+</operator>
+

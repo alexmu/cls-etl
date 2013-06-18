@@ -30,7 +30,7 @@ import org.dom4j.io.SAXReader;
  */
 public class XMLFileInputOperator extends Operator {
 
-    public static final String OUTPUT_PORT = "output1";
+    public static final String OUT_PORT = "outport1";
     public static final String ERRDATA_PORT = "error1";
 
     private String xmlFilePath="";
@@ -40,12 +40,12 @@ public class XMLFileInputOperator extends Operator {
     
     
     protected void setupPorts() throws Exception{
-        setupPort(new Port(Port.OUTPUT, OUTPUT_PORT));
+        setupPort(new Port(Port.OUTPUT, OUT_PORT));
         setupPort(new Port(Port.OUTPUT, ERRDATA_PORT));
     }
 
     public void validate() throws Exception {
-         if (getPort(OUTPUT_PORT).getConnector().size() < 1) {
+         if (getPort(OUT_PORT).getConnector().size() < 1) {
             throw new Exception("out port with no connectors");
         }
     }
