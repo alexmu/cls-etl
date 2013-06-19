@@ -36,4 +36,5 @@ public class FieldMapOperator extends Operator {
     protected void parseParameters(String pParameters) throws Exception {
     }
     
+    
 }

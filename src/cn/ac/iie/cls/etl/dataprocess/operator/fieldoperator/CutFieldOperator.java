@@ -50,6 +50,7 @@ public class CutFieldOperator extends Operator {
                         for (int i = 0; i < dataSize; i++) {
                             Record record = dataSet.getRecord(i);
                             currentFieldValue = record.getField(field2Cut.fieldName);
+                            record.setField(field2Cut.fieldName, currentFieldValue.replaceAll(field2Cut.regPattern, name));
                         }
                     } else {
                         String currentFieldValue = null;
