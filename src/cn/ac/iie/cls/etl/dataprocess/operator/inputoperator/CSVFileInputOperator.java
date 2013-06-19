@@ -9,6 +9,7 @@ import cn.ac.iie.cls.etl.dataprocess.dataset.DataSet;
 import cn.ac.iie.cls.etl.dataprocess.dataset.Record;
 import cn.ac.iie.cls.etl.dataprocess.operator.Operator;
 import cn.ac.iie.cls.etl.dataprocess.operator.Port;
+import cn.ac.iie.cls.etl.dataprocess.util.VFSUtil;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -55,27 +56,38 @@ public class CSVFileInputOperator extends Operator {
 
         try {
             DataSet dataSet = getDataSet(DataSet.VALID);
-            fr = new FileReader("csv-sample-file.csv");
-            reader = new CSVReader(fr);
-            while ((line = reader.readNext()) != null) {
-                record = new Record();
-                for (Column column : columnSet) {
-                    record.appendField(line[column.columnIdx - 1]); //取出数据
+            File inputFile = VFSUtil.getFile(csvFile);
+            if (inputFile == null) {
+                reportExecuteStatus();
+            } else {
+                fr = new FileReader(inputFile);
+                reader = new CSVReader(fr);
+                while ((line = reader.readNext()) != null) {
+                    record = new Record();
+                    for (Column column : columnSet) {
+                        record.appendField(line[column.columnIdx - 1]); //取出数据
+                    }
+                    dataSet.appendRecord(record);
+                    if (dataSet.size() >= 1000) {
+                        portSet.get(OUT_PORT).write(dataSet);
+                        reportExecuteStatus();
+                        dataSet = getDataSet(DataSet.VALID);
+                    }
                 }
-                dataSet.appendRecord(record);
-                if (dataSet.size() >= 1000) {
+                if (dataSet.size() > 0) {
                     portSet.get(OUT_PORT).write(dataSet);
                     reportExecuteStatus();
-                    dataSet = getDataSet(DataSet.VALID);
                 }
             }
-            if (dataSet.size() > 0) {
-                portSet.get(OUT_PORT).write(dataSet);
-                reportExecuteStatus();
-            }
-            portSet.get(OUT_PORT).write(getDataSet(DataSet.EOS));
+
         } catch (Exception ex) {
             ex.printStackTrace();
+        } finally {
+            try {
+                fr.close();
+            } catch (Exception ex) {
+            }
+
             try {
                 portSet.get(OUT_PORT).write(getDataSet(DataSet.EOS));
             } catch (Exception ex2) {

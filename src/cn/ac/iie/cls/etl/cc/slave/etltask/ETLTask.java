@@ -65,7 +65,7 @@ public class ETLTask implements Runnable {
                         if (operatorElt.attributeValue("class").endsWith("FileInput")) {
                             List<Element> paramElts = operatorElt.elements("parameter");
                             for (Element paramElt : paramElts) {
-                                if (paramElt.attributeValue("name").equals("srcpath")) {
+                                if (paramElt.attributeValue("name").equals("csvFile")) {
                                     etlTask.filePath = paramElt.getStringValue();
                                 }
                             }
@@ -123,9 +123,9 @@ public class ETLTask implements Runnable {
         ETLTaskTracker.getETLTaskTracker().removeTask(this);
         try {
             HttpClient httpClient = new DefaultHttpClient();
-            HttpPost httppost = new HttpPost("http://127.0.0.1:7060/resources/dataetl/etltaskreport");
+            HttpPost httppost = new HttpPost("http://192.168.111.129:7060/resources/dataetl/etltaskreport");
 
-            InputStreamEntity reqEntity = new InputStreamEntity(new ByteArrayInputStream(("task for " + getID() + " exits").getBytes()), -1);
+            InputStreamEntity reqEntity = new InputStreamEntity(new ByteArrayInputStream(("task exit|succeeded|" + processJobInstanceID + "|" + filePath).getBytes()), -1);
             reqEntity.setContentType("binary/octet-stream");
             reqEntity.setChunked(true);
             httppost.setEntity(reqEntity);
