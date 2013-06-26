@@ -13,6 +13,7 @@ import cn.ac.iie.cls.etl.dataprocess.operator.Port;
 import cn.ac.iie.cls.etl.dataprocess.operator.fieldoperator.AddFieldOperator;
 import cn.ac.iie.cls.etl.dataprocess.operator.recordoperator.RecordFilterOperator;
 import cn.ac.iie.cls.etl.dataprocess.operator.inputoperator.XMLFileInputOperator;
+import cn.ac.iie.cls.etl.dataprocess.operator.outputoperator.TableOutputOperator;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -39,6 +40,7 @@ public class DataProcessFactory {
             put("AddField", AddFieldOperator.class);
             put("Filter", RecordFilterOperator.class);
             put("AlmightyOutput", AlmightyOutputOperator.class);
+            put("TableOutport", TableOutputOperator.class);
         }
     };
 

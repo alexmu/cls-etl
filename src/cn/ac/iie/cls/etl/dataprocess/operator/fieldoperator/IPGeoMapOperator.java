@@ -34,6 +34,7 @@ public class IPGeoMapOperator extends Operator {
 
     @Override
     protected void parseParameters(String pParameters) throws Exception {
+        
     }
     
 }

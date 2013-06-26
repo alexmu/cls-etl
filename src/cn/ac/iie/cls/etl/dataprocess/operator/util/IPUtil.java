@@ -10,6 +10,7 @@ package cn.ac.iie.cls.etl.dataprocess.operator.util;
  */
 public class IPUtil {
     
+    
     public static long IPV4Str2Long(String in) {
 
         if (in == null || in.equals("")) {

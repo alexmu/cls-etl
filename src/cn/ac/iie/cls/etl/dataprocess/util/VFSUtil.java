@@ -12,18 +12,30 @@ import java.io.File;
  */
 public class VFSUtil {
 
-    public static File getFile(String pFilePath) {
+    public static File getFile(String pFilePathStr) {
         File file = null;
-        if (pFilePath.startsWith("hdfs")) {
+        if (pFilePathStr.startsWith("hdfs")) {
             try {
-                HDFSUtil.get(pFilePath, "D:\\projects-workspace\\tmp\\sample.txt");
+                HDFSUtil.get(pFilePathStr, "D:\\projects-workspace\\tmp\\sample.txt");
                 file = new File("D:\\projects-workspace\\tmp\\sample.txt");
             } catch (Exception ex) {
                 ex.printStackTrace();
                 file = null;
             }
-        } else if (pFilePath.startsWith("file")) {
+        } else if (pFilePathStr.startsWith("file")) {
+        } else {
+            file = new File("D:\\projects-workspace\\tmp\\sample.txt");
         }
         return file;
+    }
+
+    public static void putFile(String pSrcFilePathStr, String pDestFilePathStr) {
+        if (pDestFilePathStr.startsWith("hdfs")) {
+            try {
+                HDFSUtil.put(pSrcFilePathStr, pDestFilePathStr);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
     }
 }

@@ -1,0 +1,11 @@
+<operator name=" ff8080812ae4b413012aef2f338a009b" alias="tableoutput" class="TableOutport">
+    <note>desc</note>
+    <parameter name="datasource">huizong</parameter>
+    <parameter name="tableName">f_917mt </parameter>
+    <parameter name="isClean">false</parameter>
+    <parameter name="rowlimit">300</parameter>
+    <parameterlist name="fields">
+        <parametermap tablefield="RESOURCE_ID" streamfield="id" />
+        <parametermap tablefield="RESOURCE_NAME" streamfield="name" />
+    </parameterlist>
+</operator>

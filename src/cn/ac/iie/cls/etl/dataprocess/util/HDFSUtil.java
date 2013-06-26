@@ -29,14 +29,14 @@ public class HDFSUtil {
 
         try {
             Configuration conf = new Configuration();
-//            FileSystem fs = FileSystem.get(URI.create(pHDFSPath), conf);
-//            Path srcPath = new Path(pSrcFilePathStr);
-//            Path dstPath = new Path(hdfsPath + "/" + dstFile);
-//            if (fs.isDirectory(dstPath)) {                
-//            } else {
-//                fs.mkdirs(dstPath);
-//            }
-//            fs.copyFromLocalFile(srcPath, dstPath);           
+            FileSystem fs = FileSystem.get(URI.create(pHDFSFilePathStr), conf);
+            Path srcPath = new Path(pSrcFilePathStr);
+            Path dstPath = new Path(pHDFSFilePathStr);
+            if (fs.isFile(dstPath)) {                
+            } else {
+                fs.mkdirs(dstPath);
+            }
+            fs.copyFromLocalFile(srcPath, dstPath);           
         } catch (Exception ex) {
             logger.warn("put " + pSrcFilePathStr + " to hdfs(" + pHDFSFilePathStr + ") unsuccessfully for " + ex.getMessage(), ex);
             throw ex;

@@ -4,9 +4,13 @@
  */
 package cn.ac.iie.cls.etl.dataprocess.operator.fieldoperator;
 
+import cn.ac.iie.cls.etl.dataprocess.dataset.DataSet;
+import cn.ac.iie.cls.etl.dataprocess.dataset.Record;
 import cn.ac.iie.cls.etl.dataprocess.operator.Operator;
 import cn.ac.iie.cls.etl.dataprocess.operator.Port;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import org.dom4j.Document;
@@ -37,7 +41,44 @@ public class TimeFormatOperator extends Operator {
     }
 
     protected void execute() {
-        
+        try {
+            while (true) {
+                DataSet dataSet = portSet.get(IN_PORT).getNext();
+                int dataSize = dataSet.size();
+                for (Field2TimeFormat field2TimeFormat : field2TimeFormatSet) {
+                    if (field2TimeFormat.fromPattern.equals("integer") && field2TimeFormat.toPattern.equals("string")) {
+                        SimpleDateFormat toSDF = new SimpleDateFormat(field2TimeFormat.toPattern);
+                        String currentFieldValue = null;
+                        for (int i = 0; i < dataSize; i++) {
+                            Record record = dataSet.getRecord(i);
+                            currentFieldValue = record.getField(field2TimeFormat.fieldName);
+                            record.setField(field2TimeFormat.fieldName, toSDF.format(new Date(Long.parseLong(currentFieldValue))));
+                        }
+                    } else if (field2TimeFormat.fromPattern.equals("string") && field2TimeFormat.toPattern.equals("string")) {
+                        SimpleDateFormat fromSDF = new SimpleDateFormat(field2TimeFormat.fromPattern);
+                        SimpleDateFormat toSDF = new SimpleDateFormat(field2TimeFormat.toPattern);
+                        String currentFieldValue = null;
+                        for (int i = 0; i < dataSize; i++) {
+                            Record record = dataSet.getRecord(i);
+                            currentFieldValue = record.getField(field2TimeFormat.fieldName);
+                            record.setField(field2TimeFormat.fieldName, toSDF.format(fromSDF.parse(currentFieldValue)));
+                        }
+                    } else {
+                        //fixme                        
+                    }
+                }
+
+                if (dataSet.isValid()) {
+                    portSet.get(OUT_PORT).write(dataSet);
+                    reportExecuteStatus();
+                } else {
+                    portSet.get(OUT_PORT).write(dataSet);
+                    break;
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     @Override

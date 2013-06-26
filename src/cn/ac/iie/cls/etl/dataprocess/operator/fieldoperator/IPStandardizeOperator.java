@@ -60,6 +60,8 @@ public class IPStandardizeOperator extends Operator {
                             currentFieldValue = record.getField(field2IPStd.fieldName);
                             record.setField(field2IPStd.fieldName,String.valueOf(IPUtil.IPV4Str2Long(currentFieldValue)));
                         }
+                    }else{
+                        //fixme
                     }
                 }
 
@@ -74,8 +76,9 @@ public class IPStandardizeOperator extends Operator {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-    }
-
+    }   
+    
+    
     @Override
     protected void parseParameters(String pParameters) throws Exception {
         Document document = DocumentHelper.parseText(pParameters);

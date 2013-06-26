@@ -31,7 +31,7 @@ public class ETLTaskExecuteHandler implements SlaveHandler {
     }
 
     public static void main(String[] args) {
-        File inputXml = new File("addFieldOperator-test-specific.xml");
+        File inputXml = new File("tableOutputOperator-test-specific.xml");
         try {
             String dataProcessDescriptor = "";
             BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(inputXml)));
