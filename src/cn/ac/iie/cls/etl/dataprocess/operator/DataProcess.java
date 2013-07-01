@@ -21,7 +21,7 @@ public class DataProcess extends Operator {
     protected List<Operator> exitOperatorList = new ArrayList<Operator>();
     protected Map<String, List> port2AtomicPortList = new HashMap<String, List>();
 
-    protected void setupPorts() throws Exception{
+    protected void setupPorts() throws Exception {
     }
 
     public void putSubOperator(Operator pSubOperator) throws Exception {
@@ -46,6 +46,7 @@ public class DataProcess extends Operator {
 
     protected void execute() {
         System.out.println(name + " starts with " + subOperators.size() + " sub operators");
+
         Iterator subOperatorItor = subOperators.values().iterator();
         while (subOperatorItor.hasNext()) {
             new Thread((Operator) subOperatorItor.next()).start();
@@ -53,19 +54,19 @@ public class DataProcess extends Operator {
 
         while (true) {
             try {
-                boolean subOperatorAlive = false;
+                boolean isDone = true;
                 subOperatorItor = subOperators.values().iterator();
                 while (subOperatorItor.hasNext()) {
                     Operator subOperator = (Operator) subOperatorItor.next();
-                    if (subOperator.isAlive()) {
-                        subOperatorAlive = true;
+                    if (!subOperator.isDone()) {
+                        isDone = false;
                         break;
                     }
                 }
                 //report port metrics
                 reportExecuteStatus();
-                if (!subOperatorAlive) {
-                    alive = false;
+                if (isDone) {
+                    status = SUCCEEDED;
                     break;
                 }
                 Thread.sleep(100);

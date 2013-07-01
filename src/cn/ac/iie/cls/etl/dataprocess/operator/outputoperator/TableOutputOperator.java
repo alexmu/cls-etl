@@ -73,7 +73,7 @@ public class TableOutputOperator extends Operator {
                     Record record = dataSet.getRecord(i);
                     String outString = outputFormat;
                     for (Field2TableOutput field2TableOutput : field2TableOutputSet) {
-                        outString = outString.replace(field2TableOutput.tableFieldName + "_REP", record.getField(field2TableOutput.streamFieldName));
+                        outString = outString.replace(field2TableOutput.tableFieldName + "_REP", record.getField(field2TableOutput.streamFieldName).replaceAll(",", "\\,"));
                     }
                     bw.write(outString + "\n");
                 }
@@ -83,8 +83,8 @@ public class TableOutputOperator extends Operator {
 //                    reportExecuteStatus();
                 } else {
                     bw.close();
-//                    VFSUtil.putFile(tmpDataFileName, RuntimeEnv.getParam(RuntimeEnv.HDFS_CONN_STR)+"/user/hive/warehouse/f_917mt/");
-                    VFSUtil.putFile(tmpDataFileName,"hdfs://192.168.84.2:8020/user/hive/warehouse/f_917mt/");
+                    VFSUtil.putFile(tmpDataFileName, RuntimeEnv.getParam(RuntimeEnv.HDFS_CONN_STR)+"/user/hive/warehouse/"+tableName);
+//                    VFSUtil.putFile(tmpDataFileName,"hdfs://192.168.84.2:8020/user/hive/warehouse/f_917mt/");
                     break;
                 }
             }
@@ -144,8 +144,9 @@ public class TableOutputOperator extends Operator {
         }
 
         for (TableColumn tableColumn : columnSet) {
-            outputFormat = outputFormat.replace(tableColumn.name + "_VAL", "");
+            outputFormat = outputFormat.replaceFirst(tableColumn.name + "_VAL", "");
         }
+        
     }
 
     private static List getTable(String pTableName) {
@@ -154,8 +155,8 @@ public class TableOutputOperator extends Operator {
         try {
             String databaseName = "default";
             Class.forName("org.apache.hive.jdbc.HiveDriver");
-//            conn = DriverManager.getConnection((String) RuntimeEnv.getParam(RuntimeEnv.HIVE_CONN_STR), "", "");
-            conn = DriverManager.getConnection("jdbc:hive2://192.168.84.2:21050/;auth=noSasl", "", "");
+            conn = DriverManager.getConnection((String) RuntimeEnv.getParam(RuntimeEnv.HIVE_CONN_STR), "", "");
+//            conn = DriverManager.getConnection("jdbc:hive2://192.168.84.2:21050/;auth=noSasl", "", "");
             Statement stmt = conn.createStatement();
             //parse xml
             //then create table

@@ -5,6 +5,8 @@
 package cn.ac.iie.cls.etl.dataprocess.util;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  *
@@ -12,12 +14,15 @@ import java.io.File;
  */
 public class VFSUtil {
 
+    public static final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
+
     public static File getFile(String pFilePathStr) {
         File file = null;
         if (pFilePathStr.startsWith("hdfs")) {
             try {
-                HDFSUtil.get(pFilePathStr, "D:\\projects-workspace\\tmp\\sample.txt");
-                file = new File("D:\\projects-workspace\\tmp\\sample.txt");
+                String localTmpFilePathStr = "/tmp/xtld/data-cache/" + sdf.format(new Date());
+                HDFSUtil.get(pFilePathStr, localTmpFilePathStr);
+                file = new File(localTmpFilePathStr);
             } catch (Exception ex) {
                 ex.printStackTrace();
                 file = null;

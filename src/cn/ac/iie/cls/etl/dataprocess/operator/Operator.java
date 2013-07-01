@@ -19,8 +19,11 @@ public abstract class Operator implements Runnable {
     protected Operator parentOperator;
     protected Map<String, Port> portSet = new HashMap<String, Port>();
     protected ETLTask task = null;
-    protected boolean alive;
-    
+    protected int status;
+    public static final int STANDBY = 0;
+    public static final int EXECUTING = 0;
+    public static final int SUCCEEDED = 2;
+    public static final int FAILED = -1;
 
     protected abstract void setupPorts() throws Exception;
 
@@ -28,7 +31,7 @@ public abstract class Operator implements Runnable {
 
     public void init(String pName, String pParameters) throws Exception {
         name = pName;
-        alive = true;
+        status = STANDBY;
         setupPorts();
         parseParameters(pParameters);
     }
@@ -55,8 +58,12 @@ public abstract class Operator implements Runnable {
         task = pTaskManager;
     }
 
-    public boolean isAlive() {
-        return alive;
+    public boolean isDone() {
+        if (status == SUCCEEDED || status == FAILED) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     protected void reportExecuteStatus() {
@@ -73,8 +80,8 @@ public abstract class Operator implements Runnable {
 
     public void run() {
         System.out.println(name + " starts.");
-        execute();
-        alive = false;
+        status = EXECUTING;
+        execute();        
         System.out.println(name + " exit.");
     }
 }
