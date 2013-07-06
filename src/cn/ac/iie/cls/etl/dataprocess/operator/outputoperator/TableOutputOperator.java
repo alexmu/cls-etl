@@ -9,7 +9,7 @@ import cn.ac.iie.cls.etl.dataprocess.dataset.DataSet;
 import cn.ac.iie.cls.etl.dataprocess.dataset.Record;
 import cn.ac.iie.cls.etl.dataprocess.operator.Operator;
 import cn.ac.iie.cls.etl.dataprocess.operator.Port;
-import cn.ac.iie.cls.etl.dataprocess.util.VFSUtil;
+import cn.ac.iie.cls.etl.dataprocess.util.fs.VFSUtil;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -53,6 +53,9 @@ public class TableOutputOperator extends Operator {
         setupPort(new Port(Port.INPUT, IN_PORT));
         setupPort(new Port(Port.OUTPUT, OUT_PORT));
         setupPort(new Port(Port.OUTPUT, ERROR_PORT));
+    }
+    
+    protected void init0() throws Exception {
     }
 
     public void validate() throws Exception {

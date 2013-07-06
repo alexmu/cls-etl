@@ -9,7 +9,7 @@ import cn.ac.iie.cls.etl.dataprocess.dataset.DataSet;
 import cn.ac.iie.cls.etl.dataprocess.dataset.Record;
 import cn.ac.iie.cls.etl.dataprocess.operator.Operator;
 import cn.ac.iie.cls.etl.dataprocess.operator.Port;
-import cn.ac.iie.cls.etl.dataprocess.util.VFSUtil;
+import cn.ac.iie.cls.etl.dataprocess.util.fs.VFSUtil;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -42,6 +42,9 @@ public class CSVFileInputOperator extends Operator {
         setupPort(new Port(Port.OUTPUT, ERROR_PORT));
     }
 
+    protected void init0() throws Exception {
+    }
+    
     public void validate() throws Exception {
         if (getPort(OUT_PORT).getConnector().size() < 1) {
             throw new Exception("out port with no connectors");

@@ -43,6 +43,9 @@ public class XMLFileInputOperator extends Operator {
         setupPort(new Port(Port.OUTPUT, OUT_PORT));
         setupPort(new Port(Port.OUTPUT, ERRDATA_PORT));
     }
+    
+    protected void init0() throws Exception {
+    }
 
     public void validate() throws Exception {
          if (getPort(OUT_PORT).getConnector().size() < 1) {

@@ -24,6 +24,9 @@ public class DataProcess extends Operator {
     protected void setupPorts() throws Exception {
     }
 
+    protected void init0() throws Exception {
+    }
+
     public void putSubOperator(Operator pSubOperator) throws Exception {
         if (subOperators.get(pSubOperator.getName()) == null) {
             subOperators.put(pSubOperator.getName(), pSubOperator);

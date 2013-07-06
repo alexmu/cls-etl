@@ -34,6 +34,9 @@ public class TimeFormatOperator extends Operator {
         setupPort(new Port(Port.OUTPUT, ERROR_PORT));
     }
 
+    protected void init0() throws Exception {
+    }
+
     public void validate() throws Exception {
         if (getPort(OUT_PORT).getConnector().size() < 1) {
             throw new Exception("out port with no connectors");
@@ -44,31 +47,32 @@ public class TimeFormatOperator extends Operator {
         try {
             while (true) {
                 DataSet dataSet = portSet.get(IN_PORT).getNext();
-                int dataSize = dataSet.size();
-                for (Field2TimeFormat field2TimeFormat : field2TimeFormatSet) {
-                    if (field2TimeFormat.fromPattern.equals("integer") && field2TimeFormat.toPattern.equals("string")) {
-                        SimpleDateFormat toSDF = new SimpleDateFormat(field2TimeFormat.toPattern);
-                        String currentFieldValue = null;
-                        for (int i = 0; i < dataSize; i++) {
-                            Record record = dataSet.getRecord(i);
-                            currentFieldValue = record.getField(field2TimeFormat.fieldName);
-                            record.setField(field2TimeFormat.fieldName, toSDF.format(new Date(Long.parseLong(currentFieldValue))));
-                        }
-                    } else if (field2TimeFormat.fromPattern.equals("string") && field2TimeFormat.toPattern.equals("string")) {
-                        SimpleDateFormat fromSDF = new SimpleDateFormat(field2TimeFormat.fromPattern);
-                        SimpleDateFormat toSDF = new SimpleDateFormat(field2TimeFormat.toPattern);
-                        String currentFieldValue = null;
-                        for (int i = 0; i < dataSize; i++) {
-                            Record record = dataSet.getRecord(i);
-                            currentFieldValue = record.getField(field2TimeFormat.fieldName);
-                            record.setField(field2TimeFormat.fieldName, toSDF.format(fromSDF.parse(currentFieldValue)));
-                        }
-                    } else {
-                        //fixme                        
-                    }
-                }
 
                 if (dataSet.isValid()) {
+                    int dataSize = dataSet.size();
+                    for (Field2TimeFormat field2TimeFormat : field2TimeFormatSet) {
+                        if (field2TimeFormat.fromPattern.equals("integer") && field2TimeFormat.toPattern.equals("string")) {
+                            SimpleDateFormat toSDF = new SimpleDateFormat(field2TimeFormat.toPattern);
+                            String currentFieldValue = null;
+                            for (int i = 0; i < dataSize; i++) {
+                                Record record = dataSet.getRecord(i);
+                                currentFieldValue = record.getField(field2TimeFormat.fieldName);
+                                record.setField(field2TimeFormat.fieldName, toSDF.format(new Date(Long.parseLong(currentFieldValue))));
+                            }
+                        } else if (field2TimeFormat.fromPattern.equals("string") && field2TimeFormat.toPattern.equals("string")) {
+                            SimpleDateFormat fromSDF = new SimpleDateFormat(field2TimeFormat.fromPattern);
+                            SimpleDateFormat toSDF = new SimpleDateFormat(field2TimeFormat.toPattern);
+                            String currentFieldValue = null;
+                            for (int i = 0; i < dataSize; i++) {
+                                Record record = dataSet.getRecord(i);
+                                currentFieldValue = record.getField(field2TimeFormat.fieldName);
+                                record.setField(field2TimeFormat.fieldName, toSDF.format(fromSDF.parse(currentFieldValue)));
+                            }
+                        } else {
+                            //fixme                        
+                        }
+                    }
+
                     portSet.get(OUT_PORT).write(dataSet);
                     reportExecuteStatus();
                 } else {

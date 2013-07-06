@@ -23,6 +23,9 @@ public class AlmightyOutputOperator extends Operator {
         setupPort(new Port(Port.OUTPUT, OUT_PORT));
         setupPort(new Port(Port.OUTPUT, ERROR_PORT));
     }
+    
+    protected void init0() throws Exception {
+    }
 
     public void validate() throws Exception {
     }

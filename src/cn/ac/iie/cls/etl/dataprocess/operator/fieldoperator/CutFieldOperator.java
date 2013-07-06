@@ -32,6 +32,9 @@ public class CutFieldOperator extends Operator {
         setupPort(new Port(Port.OUTPUT, ERROR_PORT));
     }
 
+    protected void init0() throws Exception {
+    }
+
     public void validate() throws Exception {
         if (getPort(OUT_PORT).getConnector().size() < 1) {
             throw new Exception("out port with no connectors");
@@ -42,27 +45,29 @@ public class CutFieldOperator extends Operator {
         try {
             while (true) {
                 DataSet dataSet = portSet.get(IN_PORT).getNext();
-                int dataSize = dataSet.size();
-                for (Field2Cut field2Cut : field2CutSet) {
-                    if (field2Cut.useReg) {
-                        //fixme
-                        String currentFieldValue = null;
-                        for (int i = 0; i < dataSize; i++) {
-                            Record record = dataSet.getRecord(i);
-                            currentFieldValue = record.getField(field2Cut.fieldName);
-                            record.setField(field2Cut.fieldName, currentFieldValue.replaceAll(field2Cut.regPattern, name));
-                        }
-                    } else {
-                        String currentFieldValue = null;
-                        for (int i = 0; i < dataSize; i++) {
-                            Record record = dataSet.getRecord(i);
-                            currentFieldValue = record.getField(field2Cut.fieldName);
-                            record.setField(field2Cut.fieldName, currentFieldValue.substring(field2Cut.startIdx, field2Cut.endIdx));
-                        }
-                    }
-                }
+
 
                 if (dataSet.isValid()) {
+                    int dataSize = dataSet.size();
+                    for (Field2Cut field2Cut : field2CutSet) {
+                        if (field2Cut.useReg) {
+                            //fixme
+                            String currentFieldValue = null;
+                            for (int i = 0; i < dataSize; i++) {
+                                Record record = dataSet.getRecord(i);
+                                currentFieldValue = record.getField(field2Cut.fieldName);
+                                record.setField(field2Cut.fieldName, currentFieldValue.replaceAll(field2Cut.regPattern, name));
+                            }
+                        } else {
+                            String currentFieldValue = null;
+                            for (int i = 0; i < dataSize; i++) {
+                                Record record = dataSet.getRecord(i);
+                                currentFieldValue = record.getField(field2Cut.fieldName);
+                                record.setField(field2Cut.fieldName, currentFieldValue.substring(field2Cut.startIdx, field2Cut.endIdx));
+                            }
+                        }
+                    }
+
                     portSet.get(OUT_PORT).write(dataSet);
                     reportExecuteStatus();
                 } else {

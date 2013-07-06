@@ -36,6 +36,9 @@ public class AddFieldOperator extends Operator {
         setupPort(new Port(Port.OUTPUT, ERROR_PORT));
     }
 
+    protected void init0() throws Exception {
+    }
+
     public void validate() throws Exception {
         if (getPort(OUT_PORT).getConnector().size() < 1) {
             throw new Exception("out port with no connectors");
@@ -46,22 +49,22 @@ public class AddFieldOperator extends Operator {
         try {
             while (true) {
                 DataSet dataSet = portSet.get(IN_PORT).getNext();
-                int dataSize = dataSet.size();
                 
-                int dataSetFieldNum = dataSet.getFieldNum();
-                int idx = 0;
-                for (Field2Add columnValueHolder : field2AddSet) {
-                    dataSet.putFieldName2Idx(columnValueHolder.fieldName, dataSetFieldNum + (idx++));
-                }
-
-                for (int i = 0; i < dataSize; i++) {
-                    Record record = dataSet.getRecord(i);
-                    for (Field2Add columnValueHolder : field2AddSet) {
-                        record.appendField(columnValueHolder.fieldValue);
-                    }
-                }
-
                 if (dataSet.isValid()) {
+                    int dataSize = dataSet.size();
+                    
+                    int dataSetFieldNum = dataSet.getFieldNum();
+                    int idx = 0;
+                    for (Field2Add columnValueHolder : field2AddSet) {
+                        dataSet.putFieldName2Idx(columnValueHolder.fieldName, dataSetFieldNum + (idx++));
+                    }
+
+                    for (int i = 0; i < dataSize; i++) {
+                        Record record = dataSet.getRecord(i);
+                        for (Field2Add columnValueHolder : field2AddSet) {
+                            record.appendField(columnValueHolder.fieldValue);
+                        }
+                    }
                     portSet.get(OUT_PORT).write(dataSet);
                     reportExecuteStatus();
                 } else {

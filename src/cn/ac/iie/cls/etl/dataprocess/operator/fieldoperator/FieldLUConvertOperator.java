@@ -32,6 +32,9 @@ public class FieldLUConvertOperator extends Operator {
         setupPort(new Port(Port.OUTPUT, ERROR_PORT));
     }
 
+    protected void init0() throws Exception {
+    }
+
     public void validate() throws Exception {
         if (getPort(OUT_PORT).getConnector().size() < 1) {
             throw new Exception("out port with no connectors");
@@ -42,22 +45,25 @@ public class FieldLUConvertOperator extends Operator {
         try {
             while (true) {
                 DataSet dataSet = portSet.get(IN_PORT).getNext();
-                int dataSize = dataSet.size();
-                for (Field2LUConvert field2LUConvert : field2LUConvertSet) {
-                    if (field2LUConvert.convertType.equals("lower")) {
-                        for (int i = 0; i < dataSize; i++) {
-                            Record record = dataSet.getRecord(i);
-                            record.setField(field2LUConvert.fieldName, record.getField(field2LUConvert.fieldName).toLowerCase());
-                        }
-                    } else if (field2LUConvert.convertType.equals("upper")) {
-                        for (int i = 0; i < dataSize; i++) {
-                            Record record = dataSet.getRecord(i);
-                            record.setField(field2LUConvert.fieldName, record.getField(field2LUConvert.fieldName).toUpperCase());
-                        }
-                    }
-                }
 
                 if (dataSet.isValid()) {
+                    int dataSize = dataSet.size();
+                    for (Field2LUConvert field2LUConvert : field2LUConvertSet) {
+                        if (field2LUConvert.convertType.equals("lower")) {
+                            for (int i = 0; i < dataSize; i++) {
+                                Record record = dataSet.getRecord(i);
+                                record.setField(field2LUConvert.fieldName, record.getField(field2LUConvert.fieldName).toLowerCase());
+                            }
+                        } else if (field2LUConvert.convertType.equals("upper")) {
+                            for (int i = 0; i < dataSize; i++) {
+                                Record record = dataSet.getRecord(i);
+                                record.setField(field2LUConvert.fieldName, record.getField(field2LUConvert.fieldName).toUpperCase());
+                            }
+                        } else {
+                            //fixme
+                        }
+                    }
+
                     portSet.get(OUT_PORT).write(dataSet);
                     reportExecuteStatus();
                 } else {

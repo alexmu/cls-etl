@@ -24,6 +24,7 @@ public class RuntimeEnv {
     public static final String HDFS_CONN_STR = "hdfsConnStr";
     public static final String HIVE_CONN_STR = "hiveConnStr";
     private static Map<String, Object> dynamicParams = new HashMap<String, Object>();
+     
     //logger
     static Logger logger = null;
 

@@ -8,7 +8,7 @@ import cn.ac.iie.cls.etl.dataprocess.dataset.DataSet;
 import cn.ac.iie.cls.etl.dataprocess.dataset.Record;
 import cn.ac.iie.cls.etl.dataprocess.operator.Operator;
 import cn.ac.iie.cls.etl.dataprocess.operator.Port;
-import cn.ac.iie.cls.etl.dataprocess.operator.util.IPUtil;
+import cn.ac.iie.cls.etl.dataprocess.util.ip.IPUtil;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -33,6 +33,9 @@ public class IPStandardizeOperator extends Operator {
         setupPort(new Port(Port.OUTPUT, ERROR_PORT));
     }
 
+    protected void init0() throws Exception {
+    }
+
     public void validate() throws Exception {
         if (getPort(OUT_PORT).getConnector().size() < 1) {
             throw new Exception("out port with no connectors");
@@ -43,29 +46,31 @@ public class IPStandardizeOperator extends Operator {
         try {
             while (true) {
                 DataSet dataSet = portSet.get(IN_PORT).getNext();
-                int dataSize = dataSet.size();
-                for (Field2IPStd field2IPStd : field2IPStdSet) {
-                    if (field2IPStd.fromPattern.equals("integer")&&field2IPStd.toPattern.equals("string")) {
-                        //fixme
-                        String currentFieldValue = null;
-                        for (int i = 0; i < dataSize; i++) {
-                            Record record = dataSet.getRecord(i);
-                            currentFieldValue = record.getField(field2IPStd.fieldName);
-                            record.setField(field2IPStd.fieldName, IPUtil.IPV4Long2Str(currentFieldValue));
-                        }
-                    } else if(field2IPStd.fromPattern.equals("string")&&field2IPStd.toPattern.equals("integer")){
-                        String currentFieldValue = null;
-                        for (int i = 0; i < dataSize; i++) {
-                            Record record = dataSet.getRecord(i);
-                            currentFieldValue = record.getField(field2IPStd.fieldName);
-                            record.setField(field2IPStd.fieldName,String.valueOf(IPUtil.IPV4Str2Long(currentFieldValue)));
-                        }
-                    }else{
-                        //fixme
-                    }
-                }
+
 
                 if (dataSet.isValid()) {
+                    int dataSize = dataSet.size();
+                    for (Field2IPStd field2IPStd : field2IPStdSet) {
+                        if (field2IPStd.fromPattern.equals("integer") && field2IPStd.toPattern.equals("string")) {
+                            //fixme
+                            String currentFieldValue = null;
+                            for (int i = 0; i < dataSize; i++) {
+                                Record record = dataSet.getRecord(i);
+                                currentFieldValue = record.getField(field2IPStd.fieldName);
+                                record.setField(field2IPStd.fieldName, IPUtil.IPV4Long2Str(currentFieldValue));
+                            }
+                        } else if (field2IPStd.fromPattern.equals("string") && field2IPStd.toPattern.equals("integer")) {
+                            String currentFieldValue = null;
+                            for (int i = 0; i < dataSize; i++) {
+                                Record record = dataSet.getRecord(i);
+                                currentFieldValue = record.getField(field2IPStd.fieldName);
+                                record.setField(field2IPStd.fieldName, String.valueOf(IPUtil.IPV4Str2Long(currentFieldValue)));
+                            }
+                        } else {
+                            //fixme
+                        }
+                    }
+
                     portSet.get(OUT_PORT).write(dataSet);
                     reportExecuteStatus();
                 } else {
@@ -76,9 +81,8 @@ public class IPStandardizeOperator extends Operator {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-    }   
-    
-    
+    }
+
     @Override
     protected void parseParameters(String pParameters) throws Exception {
         Document document = DocumentHelper.parseText(pParameters);

@@ -32,6 +32,9 @@ public class TrimFieldOperator extends Operator {
         setupPort(new Port(Port.OUTPUT, ERROR_PORT));
     }
 
+    protected void init0() throws Exception {
+    }
+
     public void validate() throws Exception {
         if (getPort(OUT_PORT).getConnector().size() < 1) {
             throw new Exception("out port with no connectors");
@@ -42,15 +45,15 @@ public class TrimFieldOperator extends Operator {
         try {
             while (true) {
                 DataSet dataSet = portSet.get(IN_PORT).getNext();
-                int dataSize = dataSet.size();
-                for (int i = 0; i < dataSize; i++) {
-                    Record record = dataSet.getRecord(i);
-                    for (Field2Trim field2Trim : field2TrimSet) {
-                        record.setField(field2Trim.fieldName, record.getField(field2Trim.fieldName).trim());
-                    }
-                }
 
                 if (dataSet.isValid()) {
+                    int dataSize = dataSet.size();
+                    for (int i = 0; i < dataSize; i++) {
+                        Record record = dataSet.getRecord(i);
+                        for (Field2Trim field2Trim : field2TrimSet) {
+                            record.setField(field2Trim.fieldName, record.getField(field2Trim.fieldName).trim());
+                        }
+                    }
                     portSet.get(OUT_PORT).write(dataSet);
                     reportExecuteStatus();
                 } else {

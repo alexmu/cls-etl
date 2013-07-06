@@ -35,6 +35,8 @@ public abstract class Operator implements Runnable {
         setupPorts();
         parseParameters(pParameters);
     }
+    
+    protected abstract void init0() throws Exception;
 
     public void setupPort(Port pPort) {
         portSet.put(pPort.getName(), pPort);

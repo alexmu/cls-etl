@@ -43,6 +43,9 @@ public class TxtFileInputOperator extends Operator {
         setupPort(new Port(Port.OUTPUT, OUT_PORT));
         setupPort(new Port(Port.OUTPUT, ERRDATA_PORT));
     }
+    
+    protected void init0() throws Exception {
+    }
 
     @Override
     protected void parseParameters(String pParameters) throws Exception {
