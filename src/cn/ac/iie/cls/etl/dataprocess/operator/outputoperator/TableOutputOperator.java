@@ -65,8 +65,9 @@ public class TableOutputOperator extends Operator {
     }
 
     protected void execute() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
         try {
-            String tmpDataFileName = tableName + "_" + new SimpleDateFormat("yyyyMMddhhmmss").format(new Date());
+            String tmpDataFileName = tableName + "_" + sdf.format(new Date());
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(tmpDataFileName))));
             while (true) {
                 DataSet dataSet = portSet.get(IN_PORT).getNext();
@@ -76,8 +77,11 @@ public class TableOutputOperator extends Operator {
                     Record record = dataSet.getRecord(i);
                     String outString = outputFormat;
                     for (Field2TableOutput field2TableOutput : field2TableOutputSet) {
-                        outString = outString.replace(field2TableOutput.tableFieldName + "_REP", record.getField(field2TableOutput.streamFieldName).replaceAll(",", "\\,"));
+                        String fieldVal = record.getField(field2TableOutput.streamFieldName).replaceAll("\\\\","\\\\\\\\\\\\\\\\");
+                        fieldVal = fieldVal.replaceAll(",", "\\\\\\\\,");
+                        outString = outString.replaceFirst(field2TableOutput.tableFieldName + "_REP", fieldVal);
                     }
+                    outString = outString.replaceFirst("dms_update_time_REP", sdf.format(new Date()));
                     bw.write(outString + "\n");
                 }
                 if (dataSet.isValid()) {
@@ -91,7 +95,9 @@ public class TableOutputOperator extends Operator {
                     break;
                 }
             }
+            status = SUCCEEDED;
         } catch (Exception ex) {
+            status = FAILED;
             ex.printStackTrace();
         }
     }
@@ -119,7 +125,7 @@ public class TableOutputOperator extends Operator {
 
         while (parameterItor.hasNext()) {
             Element paraMapElt = (Element) parameterItor.next();
-            field2TableOutputSet.add(new Field2TableOutput(paraMapElt.attributeValue("streamfield").toLowerCase(), paraMapElt.attributeValue("tablefield").toLowerCase()));
+            field2TableOutputSet.add(new Field2TableOutput(paraMapElt.attributeValue("streamfield"), paraMapElt.attributeValue("tablefield").toLowerCase()));
         }
 
         List<TableColumn> columnSet = null;
@@ -147,18 +153,20 @@ public class TableOutputOperator extends Operator {
         }
 
         for (TableColumn tableColumn : columnSet) {
-            outputFormat = outputFormat.replaceFirst(tableColumn.name + "_VAL", "");
+            outputFormat = outputFormat.replaceFirst(tableColumn.name + "_VAL", "\\\\N");
         }
         
     }
 
-    private static List getTable(String pTableName) {
+    private  List getTable(String pTableName) {
         List<TableColumn> columnSet = new ArrayList<TableColumn>();
         Connection conn = null;
         try {
             String databaseName = "default";
-            Class.forName("org.apache.hive.jdbc.HiveDriver");
-            conn = DriverManager.getConnection((String) RuntimeEnv.getParam(RuntimeEnv.HIVE_CONN_STR), "", "");
+//            Class.forName("org.apache.hive.jdbc.HiveDriver");//impala
+            Class.forName("org.apache.hadoop.hive.jdbc.HiveDriver");//hive
+            conn = DriverManager.getConnection("jdbc:hive://10.128.125.73:10000/default", "", "");
+//            conn = DriverManager.getConnection((String) RuntimeEnv.getParam(RuntimeEnv.HIVE_CONN_STR), "", "");
 //            conn = DriverManager.getConnection("jdbc:hive2://192.168.84.2:21050/;auth=noSasl", "", "");
             Statement stmt = conn.createStatement();
             //parse xml
@@ -193,7 +201,7 @@ public class TableOutputOperator extends Operator {
         }
     }
 
-    static class TableColumn {
+    class TableColumn {
 
         String name;
         String type;

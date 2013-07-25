@@ -5,7 +5,9 @@
 package cn.ac.iie.cls.etl.dataprocess.dataset;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -25,7 +27,7 @@ public class DataSet {
         status = pStatus;
     }
 
-    public void appendRecord(Record pRecord) {        
+    public void appendRecord(Record pRecord) {
         this.records.add(pRecord);
         pRecord.dataSet = this;
     }
@@ -57,8 +59,17 @@ public class DataSet {
     public void putFieldName2Idx(String pColumnName, int pColumnIdx) {
         fieldName2fieldIdx.put(pColumnName, pColumnIdx);
     }
-    
-    public int getFieldNum(){
+
+    public int getFieldNum() {
         return fieldName2fieldIdx.size();
+    }
+
+    public List<String> getFieldNameList() {
+        List<String> fielNameList = new ArrayList<String>();
+        Iterator fielNameItor = fieldName2fieldIdx.keySet().iterator();
+        while (fielNameItor.hasNext()) {
+            fielNameList.add((String) fielNameItor.next());
+        }
+        return fielNameList;
     }
 }

@@ -6,6 +6,7 @@ package cn.ac.iie.cls.etl.cc.slave.etltask;
 
 import cn.ac.iie.cls.etl.dataprocess.DataProcessFactory;
 import cn.ac.iie.cls.etl.dataprocess.operator.DataProcess;
+import cn.ac.iie.cls.etl.dataprocess.operator.Operator;
 import java.io.ByteArrayInputStream;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -31,7 +32,7 @@ public class ETLTask implements Runnable {
     private String processJobInstanceID = "";
     private String filePath = "";
     DataProcess dataProcess = null;
-    Map<String, Map> operatorReportStore = new HashMap<String, Map>();
+    Map<Operator, Map> operatorReportStore = new HashMap<Operator, Map>();
     static Logger logger = null;
 
     static {
@@ -99,25 +100,49 @@ public class ETLTask implements Runnable {
     public void run() {
         Thread t = new Thread(dataProcess);
         t.start();
+        String dataProcessStat = "";
         while (true) {
             try {
                 //report port metrics of operator
                 Iterator operatorIter = operatorReportStore.entrySet().iterator();
+                dataProcessStat = "";
                 while (operatorIter.hasNext()) {
                     Map.Entry operatorEntry = (Map.Entry<String, String>) operatorIter.next();
-                    String msg = (String) operatorEntry.getKey() + "-->";
+                    Operator operator = (Operator) operatorEntry.getKey();
+                    Operator parentOperator = operator.getParentOperator();
+                    if (dataProcessStat.isEmpty()) {
+                        if (parentOperator == null) {
+                            dataProcessStat = operator.getName() + ",null" + ":";
+                        } else {
+                            dataProcessStat = operator.getName() + "," + parentOperator.getName() + ":";
+                        }
+                    } else {
+                        dataProcessStat += "$";
+                        if (parentOperator == null) {
+                            dataProcessStat += operator.getName() + ",null" + ":";
+                        } else {
+                            dataProcessStat += operator.getName() + "," + parentOperator.getName() + ":";
+                        }
+                    }
                     Iterator portIter = ((Map) operatorEntry.getValue()).entrySet().iterator();
+                    String operatorStat = "";
                     while (portIter.hasNext()) {
                         Map.Entry portEntry = (Map.Entry<String, String>) portIter.next();
-                        msg += portEntry.getKey() + ":" + portEntry.getValue() + ",";
+                        if (operatorStat.isEmpty()) {
+                            operatorStat += portEntry.getKey() + "-" + portEntry.getValue();
+                        } else {
+                            operatorStat += "," + portEntry.getKey() + "-" + portEntry.getValue();
+                        }
                     }
-                    System.out.println(msg);
+                    dataProcessStat += operatorStat;
+                    logger.info(dataProcessStat);
                 }
-                if (!dataProcess.isDone()) {
+                if (dataProcess.isDone()) {
                     break;
                 }
-                Thread.sleep(100);
+                Thread.sleep(1000);
             } catch (Exception ex) {
+                ex.printStackTrace();
             }
         }
         ETLTaskTracker.getETLTaskTracker().removeTask(this);
@@ -125,7 +150,7 @@ public class ETLTask implements Runnable {
             HttpClient httpClient = new DefaultHttpClient();
             HttpPost httppost = new HttpPost("http://10.128.125.73:7060/resources/dataetl/etltaskreport");
 
-            InputStreamEntity reqEntity = new InputStreamEntity(new ByteArrayInputStream(("task exit|succeeded|" + processJobInstanceID + "|" + filePath).getBytes()), -1);
+            InputStreamEntity reqEntity = new InputStreamEntity(new ByteArrayInputStream(("task exit|succeeded|" + processJobInstanceID + "|" + filePath + "|" + dataProcessStat).getBytes()), -1);
             reqEntity.setContentType("binary/octet-stream");
             reqEntity.setChunked(true);
             httppost.setEntity(reqEntity);
@@ -136,9 +161,9 @@ public class ETLTask implements Runnable {
         }
     }
 
-    public void report(String operatorName, Map portMetrics) {
+    public void report(Operator pOperator, Map portMetrics) {
         synchronized (operatorReportStore) {
-            operatorReportStore.put(operatorName, portMetrics);
+            operatorReportStore.put(pOperator, portMetrics);
         }
     }
 }

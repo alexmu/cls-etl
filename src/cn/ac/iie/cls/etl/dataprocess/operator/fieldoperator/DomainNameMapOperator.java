@@ -6,10 +6,12 @@ package cn.ac.iie.cls.etl.dataprocess.operator.fieldoperator;
 
 import cn.ac.ict.ncic.util.dao.DaoPool;
 import cn.ac.iie.cls.etl.dataprocess.commons.RuntimeEnv;
+import cn.ac.iie.cls.etl.dataprocess.config.Configuration;
 import cn.ac.iie.cls.etl.dataprocess.dataset.DataSet;
 import cn.ac.iie.cls.etl.dataprocess.dataset.Record;
 import cn.ac.iie.cls.etl.dataprocess.operator.Operator;
 import cn.ac.iie.cls.etl.dataprocess.operator.Port;
+import cn.ac.iie.cls.etl.dataprocess.server.CLSETLServer;
 import cn.ac.iie.cls.etl.dataprocess.util.ip.IPUtil;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -19,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
@@ -40,6 +44,12 @@ public class DomainNameMapOperator extends Operator {
     private static Lock dnCategoryLocatorLock = new ReentrantLock();
     private static Map<String, String> dnVipLocator = null;
     private static Lock dnVipLocatorLock = new ReentrantLock();
+    static Logger logger = null;
+
+    static {
+        PropertyConfigurator.configure("log4j.properties");
+        logger = Logger.getLogger(DomainNameMapOperator.class.getName());
+    }
 
     protected void setupPorts() throws Exception {
         setupPort(new Port(Port.INPUT, IN_PORT));
@@ -53,11 +63,13 @@ public class DomainNameMapOperator extends Operator {
             if (dnGeoLocator == null) {
                 ResultSet rs = null;
                 try {
-                    String sql = "select dn,region_id from dim_geo";
+                    String sql = "select dn,dn from dim_geo";
                     rs = DaoPool.getDao(RuntimeEnv.METADB_CLUSTER).executeQuery(sql);
                     while (rs.next()) {
-                        dnGeoLocator.put(rs.getString("dn"), rs.getString("region_id"));
+                        dnGeoLocator.put(rs.getString("dn"), rs.getString("dn"));
                     }
+                } catch (Exception ex) {
+                    logger.warn(ex.getMessage(), ex);
                 } finally {
                     Connection tmpConn = null;
                     try {
@@ -90,6 +102,8 @@ public class DomainNameMapOperator extends Operator {
                     while (rs.next()) {
                         dnCategoryLocator.put(rs.getString("id"), rs.getString("region_id"));
                     }
+                } catch (Exception ex) {
+                    logger.warn(ex.getMessage(), ex);
                 } finally {
                     Connection tmpConn = null;
                     try {
@@ -122,6 +136,8 @@ public class DomainNameMapOperator extends Operator {
                     while (rs.next()) {
                         dnVipLocator.put(rs.getString("domain"), rs.getString("vip_id"));
                     }
+                } catch (Exception ex) {
+                    logger.warn(ex.getMessage(), ex);
                 } finally {
                     Connection tmpConn = null;
                     try {
@@ -185,6 +201,13 @@ public class DomainNameMapOperator extends Operator {
                                 record.appendField(dnVipLocator.get(record.getField(field2DNMap.srcFieldName)));
                             }
                         } else if (field2DNMap.locateMethod.equals("DN2TLD")) {
+                            int dataSetFieldNum = dataSet.getFieldNum();
+                            dataSet.putFieldName2Idx(field2DNMap.dstFieldName, dataSetFieldNum);
+                            for (int i = 0; i < dataSize; i++) {
+                                Record record = dataSet.getRecord(i);
+                                String domainName = record.getField(field2DNMap.srcFieldName);
+                                record.appendField(dnVipLocator.get(record.getField(field2DNMap.srcFieldName)));
+                            }
                         } else {
                             //fixme
                         }
@@ -229,5 +252,22 @@ public class DomainNameMapOperator extends Operator {
             this.dstFieldName = pDstFieldName;
             this.locateMethod = pLocateMethod;
         }
+    }
+
+    public static void main(String[] args) throws Exception {
+        String configurationFileName = "cls-etl.properties";
+        Configuration conf = Configuration.getConfiguration(configurationFileName);
+        if (conf == null) {
+            throw new Exception("reading " + configurationFileName + " is failed.");
+        }
+
+        logger.info("initializng runtime enviroment...");
+        if (!RuntimeEnv.initialize(conf)) {
+            throw new Exception("initializng runtime enviroment is failed");
+        }
+        logger.info("initialize runtime enviroment successfully");
+
+        Operator dnmOp = new DomainNameMapOperator();
+        dnmOp.init(IN_PORT, IN_PORT);
     }
 }

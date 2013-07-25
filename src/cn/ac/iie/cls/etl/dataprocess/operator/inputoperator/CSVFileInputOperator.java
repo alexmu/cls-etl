@@ -52,9 +52,9 @@ public class CSVFileInputOperator extends Operator {
     }
 
     protected void execute() {
-        CSVReader reader = null;//读取csv文件的类
-        String[] line = null;//存放读取出来的一行的数据
-        FileReader fr = null;//文件读取
+        CSVReader reader = null;
+        String[] line = null;
+        FileReader fr = null;
         Record record = null;
 
         try {
@@ -82,9 +82,10 @@ public class CSVFileInputOperator extends Operator {
                     reportExecuteStatus();
                 }
             }
-
+            status = SUCCEEDED;
         } catch (Exception ex) {
             ex.printStackTrace();
+            status = FAILED;
         } finally {
             try {
                 fr.close();

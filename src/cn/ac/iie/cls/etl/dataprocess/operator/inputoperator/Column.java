@@ -28,15 +28,15 @@ public class Column implements Comparable {
     }
 
     public static int parseType(String pColumnType) throws Exception {
-        if (pColumnType.equals("String")) {
+        if (pColumnType.equals("STRING")) {
             return STRING_TYPE;
-        } else if (pColumnType.equals("Integer")) {
+        } else if (pColumnType.equals("INTEGER")) {
             return INTEGER_TYPE;
-        } else if (pColumnType.equals("Float")) {
+        } else if (pColumnType.equals("FLOAT")) {
             return FLOAT_TYPE;
-        } else if (pColumnType.equals("Boolean")) {
+        } else if (pColumnType.equals("BOOLEAN")) {
             return BOOLEAN_TYPE;
-        } else if (pColumnType.equals("Timestamp")) {
+        } else if (pColumnType.equals("TIMESTAMP")) {
             return BOOLEAN_TYPE;
         } else {
             throw new Exception("not supported type " + pColumnType);

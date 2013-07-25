@@ -8,6 +8,7 @@ import cn.ac.iie.cls.etl.dataprocess.dataset.DataSet;
 import cn.ac.iie.cls.etl.dataprocess.dataset.Record;
 import cn.ac.iie.cls.etl.dataprocess.operator.Operator;
 import cn.ac.iie.cls.etl.dataprocess.operator.Port;
+import cn.ac.iie.cls.etl.dataprocess.util.fs.VFSUtil;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,14 +25,14 @@ import org.dom4j.Element;
  *
  * @author alexmu
  */
-public class TxtFileInputOperator extends Operator {
+public class TXTFileInputOperator extends Operator {
 
     //ports
     public static final String OUT_PORT = "outport1";
     public static final String ERRDATA_PORT = "error1";
     //parameters
     private String txtFilePath = "";
-    private boolean hasTitile = false;
+    private boolean hasTitle = false;
     private String fieldDelimiter = "";
     private String recordDelimiter = "";
     private boolean trimLines = false;
@@ -43,7 +44,7 @@ public class TxtFileInputOperator extends Operator {
         setupPort(new Port(Port.OUTPUT, OUT_PORT));
         setupPort(new Port(Port.OUTPUT, ERRDATA_PORT));
     }
-    
+
     protected void init0() throws Exception {
     }
 
@@ -55,10 +56,10 @@ public class TxtFileInputOperator extends Operator {
         while (parameterItor.hasNext()) {
             Element parameterElement = (Element) parameterItor.next();
             String parameterName = parameterElement.attributeValue("name");
-            if (parameterName.equals("txtfile")) {
+            if (parameterName.equals("txtFile")) {
                 txtFilePath = parameterElement.getStringValue();
             } else if (parameterName.equals("hasHeader")) {
-                hasTitile = Boolean.parseBoolean(parameterElement.getStringValue());
+                hasTitle = Boolean.parseBoolean(parameterElement.getStringValue());
             } else if (parameterName.equals("fieldDelimiter")) {
                 fieldDelimiter = parameterElement.getStringValue();
             } else if (parameterName.equals("recordDelimiter")) {
@@ -91,33 +92,61 @@ public class TxtFileInputOperator extends Operator {
 
     @Override
     protected void execute() {
+        BufferedReader br = null;
         try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(txtFilePath)));
-            String line = "";
-            DataSet dataSet = getDataSet();
-            while ((line = br.readLine()) != null) {
-                String[] fieldItems = line.split(fieldDelimiter);
-                Record record = new Record();
-                for (Column column : columnSet) {
-                    record.appendField(fieldItems[column.columnIdx - 1]);
+
+            File inputFile = VFSUtil.getFile(txtFilePath);
+            if (inputFile == null) {
+                reportExecuteStatus();
+            } else {
+                br = new BufferedReader(new InputStreamReader(new FileInputStream(inputFile)));
+                String line = "";
+                DataSet dataSet = getDataSet(DataSet.VALID);
+                if (hasTitle) {
+                    line = br.readLine();
                 }
-                dataSet.appendRecord(record);
-                if (dataSet.size() >= 1000) {                   
-                    dataSet = getDataSet();
-                    //write to outport
+                while ((line = br.readLine()) != null) {
+                    String[] fieldItems = line.split(fieldDelimiter);
+                    Record record = new Record();
+                    for (Column column : columnSet) {
+                        record.appendField(fieldItems[column.columnIdx - 1]);
+                    }
+                    dataSet.appendRecord(record);
+                    if (dataSet.size() >= 1000) {
+                        portSet.get(OUT_PORT).write(dataSet);
+                        reportExecuteStatus();
+                        dataSet = getDataSet(DataSet.VALID);
+                    }
+                }
+                if (dataSet.size() > 0) {
+                    portSet.get(OUT_PORT).write(dataSet);
+                    reportExecuteStatus();
                 }
             }
-            System.out.println(dataSet.size());
+            status = SUCCEEDED;
         } catch (Exception ex) {
             ex.printStackTrace();
+            status = FAILED;
+        } finally {
+            try {
+                br.close();
+            } catch (Exception ex) {
+            }
+
+            try {
+                portSet.get(OUT_PORT).write(getDataSet(DataSet.EOS));
+            } catch (Exception ex2) {
+            }
         }
     }
 
-    private DataSet getDataSet() {
-        DataSet dataSet = new DataSet(DataSet.VALID);
-        int idx = 0;
-        for (Column column : columnSet) {
-            dataSet.putFieldName2Idx(column.columnName, idx++);
+    private DataSet getDataSet(int dataSetType) {
+        DataSet dataSet = new DataSet(dataSetType);
+        if (dataSetType == DataSet.VALID) {
+            int idx = 0;
+            for (Column column : columnSet) {
+                dataSet.putFieldName2Idx(column.columnName, idx++);
+            }
         }
         return dataSet;
     }
@@ -132,7 +161,7 @@ public class TxtFileInputOperator extends Operator {
                 dataProcessDescriptor += line;
             }
             System.out.println(dataProcessDescriptor);
-            TxtFileInputOperator txtFileInputOperator = new TxtFileInputOperator();
+            TXTFileInputOperator txtFileInputOperator = new TXTFileInputOperator();
             txtFileInputOperator.parseParameters(dataProcessDescriptor);
             txtFileInputOperator.execute();
             System.out.println("parse ok");

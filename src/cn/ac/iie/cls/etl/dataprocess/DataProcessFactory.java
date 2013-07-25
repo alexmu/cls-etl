@@ -11,8 +11,11 @@ import cn.ac.iie.cls.etl.dataprocess.operator.DataProcess;
 import cn.ac.iie.cls.etl.dataprocess.operator.Operator;
 import cn.ac.iie.cls.etl.dataprocess.operator.Port;
 import cn.ac.iie.cls.etl.dataprocess.operator.fieldoperator.AddFieldOperator;
+import cn.ac.iie.cls.etl.dataprocess.operator.fieldoperator.IPMapOperator;
+import cn.ac.iie.cls.etl.dataprocess.operator.inputoperator.TXTFileInputOperator;
 import cn.ac.iie.cls.etl.dataprocess.operator.recordoperator.RecordFilterOperator;
 import cn.ac.iie.cls.etl.dataprocess.operator.inputoperator.XMLFileInputOperator;
+import cn.ac.iie.cls.etl.dataprocess.operator.outputoperator.GlobalTableOuputOperator;
 import cn.ac.iie.cls.etl.dataprocess.operator.outputoperator.TableOutputOperator;
 import java.io.BufferedReader;
 import java.io.File;
@@ -35,12 +38,15 @@ public class DataProcessFactory {
 
     private static Map<String, Class> operatorClassSet = new HashMap<String, Class>() {
         {
+            put("TXTFileInput", TXTFileInputOperator.class);
             put("CSVFileInput", CSVFileInputOperator.class);
             put("XMLFileInput", XMLFileInputOperator.class);
             put("AddField", AddFieldOperator.class);
+            put("IpGeoMap", IPMapOperator.class);
             put("Filter", RecordFilterOperator.class);
             put("AlmightyOutput", AlmightyOutputOperator.class);
-            put("TableOutport", TableOutputOperator.class);
+            put("TableOutput", TableOutputOperator.class);
+            put("GlobalTableOutput", GlobalTableOuputOperator.class);
         }
     };
 
@@ -70,6 +76,7 @@ public class DataProcessFactory {
             Map.Entry entry = (Map.Entry<String, String>) iter.next();
             String fromPort = (String) entry.getKey();
             String[] fromPortInfo = fromPort.split("\\.");
+            System.out.println(fromPortInfo[0]);
             Operator fromOperator = operatorSet.get(fromPortInfo[0]);
 
             if (!(fromOperator instanceof DataProcess)) {

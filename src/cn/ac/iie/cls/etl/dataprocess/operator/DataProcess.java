@@ -72,7 +72,7 @@ public class DataProcess extends Operator {
                     status = SUCCEEDED;
                     break;
                 }
-                Thread.sleep(100);
+                Thread.sleep(2000);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -121,7 +121,7 @@ public class DataProcess extends Operator {
             }
             portMetrics.put(port.getName(), metrics);
         }
-        task.report(name, portMetrics);
+        task.report(this, portMetrics);
     }
 
     @Override

@@ -32,10 +32,11 @@ public abstract class Operator implements Runnable {
     public void init(String pName, String pParameters) throws Exception {
         name = pName;
         status = STANDBY;
+        init0();
         setupPorts();
         parseParameters(pParameters);
     }
-    
+
     protected abstract void init0() throws Exception;
 
     public void setupPort(Port pPort) {
@@ -48,6 +49,10 @@ public abstract class Operator implements Runnable {
 
     public String getName() {
         return name;
+    }
+    
+    public Operator getParentOperator(){
+        return parentOperator;
     }
 
     public void setParentOperator(Operator parentOperator) {
@@ -64,6 +69,7 @@ public abstract class Operator implements Runnable {
         if (status == SUCCEEDED || status == FAILED) {
             return true;
         } else {
+            System.out.println(name + "'status:" + status);
             return false;
         }
     }
@@ -75,7 +81,7 @@ public abstract class Operator implements Runnable {
             Port port = (Port) portIter.next();
             portMetrics.put(port.getName(), port.getMetric());
         }
-        task.report(name, portMetrics);
+        task.report(this, portMetrics);
     }
 
     protected abstract void execute();
@@ -83,7 +89,7 @@ public abstract class Operator implements Runnable {
     public void run() {
         System.out.println(name + " starts.");
         status = EXECUTING;
-        execute();        
+        execute();
         System.out.println(name + " exit.");
     }
 }
