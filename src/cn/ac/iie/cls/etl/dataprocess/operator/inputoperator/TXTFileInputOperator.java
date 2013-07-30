@@ -23,7 +23,7 @@ import org.dom4j.Element;
 
 /**
  *
- * @author alexmu
+ * @author alexmu.lbh
  */
 public class TXTFileInputOperator extends Operator {
 
