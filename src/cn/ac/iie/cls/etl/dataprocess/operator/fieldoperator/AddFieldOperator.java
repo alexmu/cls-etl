@@ -4,6 +4,7 @@
  */
 package cn.ac.iie.cls.etl.dataprocess.operator.fieldoperator;
 
+import cn.ac.iie.cls.etl.cc.slave.etltask.ETLTask;
 import cn.ac.iie.cls.etl.dataprocess.dataset.DataSet;
 import cn.ac.iie.cls.etl.dataprocess.dataset.Record;
 import cn.ac.iie.cls.etl.dataprocess.operator.Operator;
@@ -49,10 +50,10 @@ public class AddFieldOperator extends Operator {
         try {
             while (true) {
                 DataSet dataSet = portSet.get(IN_PORT).getNext();
-                
+
                 if (dataSet.isValid()) {
                     int dataSize = dataSet.size();
-                    
+
                     int dataSetFieldNum = dataSet.getFieldNum();
                     int idx = 0;
                     for (Field2Add columnValueHolder : field2AddSet) {
@@ -72,8 +73,10 @@ public class AddFieldOperator extends Operator {
                     break;
                 }
             }
+            status = SUCCEEDED;
         } catch (Exception ex) {
             ex.printStackTrace();
+            status = FAILED;
         }
     }
 
@@ -101,7 +104,7 @@ public class AddFieldOperator extends Operator {
     }
 
     public static void main(String[] args) {
-        File inputXml = new File("addFieldOperator-specific.xml");
+        File inputXml = new File("addFieldOperator-test-specific.xml");
         try {
             String dataProcessDescriptor = "";
             BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(inputXml)));
@@ -109,9 +112,9 @@ public class AddFieldOperator extends Operator {
             while ((line = br.readLine()) != null) {
                 dataProcessDescriptor += line;
             }
-            AddFieldOperator addFieldOperator = new AddFieldOperator();
-            addFieldOperator.parseParameters(dataProcessDescriptor);
-            addFieldOperator.execute();
+            ETLTask etlTask = ETLTask.getETLTask(dataProcessDescriptor);
+            Thread etlTaskRunner = new Thread(etlTask);
+            etlTaskRunner.start();
         } catch (Exception ex) {
             ex.printStackTrace();
         }

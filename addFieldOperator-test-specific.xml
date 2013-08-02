@@ -4,13 +4,13 @@
     <processConfig>
         <operator name="read_addfield1" class="Process" version="1.0" x="-1" y="-1">                        
             <operator name="csv_file_reader1" class="CSVFileInput" version="1.0" x="-1" y="-1">                
-                <parameter name="csvFile">file://./csv-sample-file.csv</parameter>                
+                <parameter name="csvFile">file://D:\projects-workspace\tmp\csv-sample-file.csv</parameter>                
                 <parameter name="hasHeader">true</parameter>                
                 <parameter name="trimLines">true</parameter>                
                 <parameter name="fileEncoding">UTF-8</parameter>                
                 <parameterlist name="columnSet">                    
-                    <parametermap columnindex="1" columnname="isp " columntype="String"/>                    
-                    <parametermap columnindex="2" columnname="time" columntype="Timestamp" frompattern="YY-MM-DD HH:mm:SS" topattern="YYYY-MM-DD HH:mm:SS"/>                
+                    <parametermap columnindex="1" columnname="isp" columntype="STRING"/>                    
+                    <parametermap columnindex="2" columnname="time" columntype="TIMESTAMP" frompattern="YY-MM-DD HH:mm:SS" topattern="YYYY-MM-DD HH:mm:SS"/>                
                 </parameterlist>                                         
             </operator>
             <operator name="addfield1" alias="addField" class="AddField">

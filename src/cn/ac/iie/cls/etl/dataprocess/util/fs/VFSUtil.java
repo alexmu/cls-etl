@@ -28,6 +28,7 @@ public class VFSUtil {
                 file = null;
             }
         } else if (pFilePathStr.startsWith("file")) {
+            file = new File(pFilePathStr.replaceFirst("file://", ""));
         } else {
             file = new File("D:\\projects-workspace\\tmp\\sample.txt");
         }
